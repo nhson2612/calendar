@@ -1,0 +1,112 @@
+services:
+  gateway-service:
+    container_name: gateway-service
+    build: ./Gateway
+    ports:
+      - "8080:8080" 
+    networks:
+      - app-network
+    depends_on:
+      - discovery-service
+      - auth-service
+      - user-service
+      - lunar-calendar-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+
+  auth-service:
+    container_name: auth-service
+    build: ./AuthService
+    networks:
+      - app-network
+    depends_on:
+      - mysql
+      - discovery-service
+      - rabbitmq
+    environment:
+        - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+        - DB_USER=${DB_USER}
+        - DB_PASSWORD=${DB_PASSWORD}
+    restart: on-failure
+  user-service:
+    container_name: user-service
+    build: ./UserService
+    networks:
+      - app-network
+    depends_on:
+      - discovery-service
+      - rabbitmq
+      - mysql
+    environment:
+        - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+        - DB_USER=${DB_USER}
+        - DB_PASSWORD=${DB_PASSWORD}
+    restart: on-failure
+  lunar-calendar-service:
+    container_name: lunar-calendar-service
+    build: ./LunarCalendarService
+    networks:
+      - app-network
+    depends_on:
+      - discovery-service
+    environment:
+        - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+
+  registration-service:
+    container_name: registration-service
+    build: ./RegistrationService
+    networks:
+      - app-network
+    depends_on:
+      - discovery-service
+      - user-service
+      - auth-service
+      - rabbitmq
+    environment:
+        - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+
+  tradition-library-service:
+    container_name: tradition-library-service
+    build: ./TraditionLibraryService
+    networks:
+      - app-network
+    depends_on:
+      - discovery-service
+      - mysql
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    restart: on-failure
+  discovery-service:
+    container_name: discovery-service
+    build: ./DiscoveryServer
+    networks:
+      - app-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+    ports:
+      - "8761:8761"
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: common_db
+    networks:
+      - app-network
+    volumes:
+      - ./dump.sql:/docker-entrypoint-initdb.d/dump.sql
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    networks:
+      - app-network
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+networks:
+  app-network:

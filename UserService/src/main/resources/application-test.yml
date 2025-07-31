@@ -1,0 +1,69 @@
+spring:
+  application:
+    name: profile-service
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          oidc-client:
+#            provider: spring
+#            client-id: oidc-client
+#            client-secret: secret
+#            authorization-grant-type: authorization_code
+#            redirect-uri: "http://127.0.0.1:8080/login/oauth2/code/oidc-client"
+#            scope: openid,profile
+#        provider:
+#          spring:
+#            issuer-uri: http://localhost:9000
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9000/oauth2/jwks
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+  datasource:
+    url: jdbc:mysql://localhost:3306/common_db
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+    show-sql: true
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+
+logging:
+  level:
+    root: info
+    org.springframework.security: debug
+    org.springframework.security.oauth2: debug
+    com.nhson.userservice.application: debug
+
+custom:
+  rabbitmq:
+    exchange: central.event.exchange
+    queues:
+      userCreated: user-profile-service.success.queue
+      userFailed: user-profile-service.rollback.queue
+server:
+  port: 8101
+
+application:
+  feign-clients:
+    calendar-service:
+      path: /

@@ -1,0 +1,12 @@
+### REGISTER
+
+POST http://localhost:8102/api/v1/registration
+Content-Type: application/json
+
+{
+  "fullName": "Nguyễn Huy Sơn",
+  "email": "johndoe@gmail.com",
+  "username": "johndoe",
+  "password": "johnandjane",
+  "telegramId": ""
+}

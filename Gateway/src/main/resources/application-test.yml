@@ -1,0 +1,86 @@
+spring:
+  application:
+    name: api-gateway
+  security:
+    oauth2:
+      client:
+        registration:
+          oidc-client:
+            client-id: oidc-client
+            client-secret: secret
+            scope: openid, profile
+            authorization-grant-type: authorization_code
+            redirect-uri: "http://gateway-service:8080/login/oauth2/code/oidc-client"
+            provider: oidc-client
+        provider:
+          oidc-client:
+            issuer-uri: http://auth-service:9000
+
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: calendar-service
+              uri: lb://calendar-service
+              predicates:
+                - Path=/calendar/**
+              filters:
+                - RewritePath=/calendar/(?<segment>.*), /api/v1/calendar/${segment}
+                - name: CircuitBreaker
+                  args:
+                    id: calendarCB
+                    fallbackUri: forward:/fallback/calendar
+
+            - id: user-service
+              uri: lb://user-service
+              predicates:
+                - Path=/user/**
+              filters:
+                - RewritePath=/user/(?<segment>.*), /api/v1/user/${segment}
+
+            - id: auth-service
+              uri: lb://auth-service
+              predicates:
+                - Path=/auth/**
+            - id: tradition-events-service
+              uri: lb://tradition-events-service
+              predicates:
+                  - Path=/events/**
+              filters:
+                - RewritePath=/events/(?<segment>.*), /api/v1/events/${segment}
+                - TokenRelay=
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-service:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      calendarCB:
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        permitted-number-of-calls-in-half-open-state: 3
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10000
+        record-exceptions:
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.web.client.RestTemplate: DEBUG
+    org.springframework.security.oauth2: TRACE
+server:
+  servlet:
+    session:
+      cookie:
+        name: GATEWAY_SESSION
+        same-site: lax
+        secure: false
+        http-only: true
+        domain: gateway-service

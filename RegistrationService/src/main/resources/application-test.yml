@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: registration-service
+application:
+  feign-clients:
+    auth-server:
+      path: /api/v1/users
+    profile-service:
+      path: /api/v1/profiles
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+custom:
+  rabbitmq:
+    exchange: central.event.exchange
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-service:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+server:
+  port: 8102

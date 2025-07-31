@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: auth-server
+  datasource:
+    url: jdbc:mysql://mysql:3306/common_db
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+    show-sql: true
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-service:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+
+server:
+  port: 9000
+#  ssl:
+#    enabled: true
+#    key-store: classpath:keystore.p12
+#    key-store-password: password
+#    key-store-type: PKCS12
+#    key-alias: authserver
+logging:
+  level:
+    root: info
+    org.springframework.security: debug
+    org.springframework.security.oauth2: debug
+    com.nhson.authservice: debug
+
+custom:
+  rabbitmq:
+    exchange: central.event.exchange
+    queues:
+      userCreate: auth-service.create-user.queue
