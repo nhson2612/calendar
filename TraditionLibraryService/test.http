@@ -1,3 +1,0 @@
-### SEARCH
-
-GET http://localhost:8080/events/search?keyword=truyền&lunarDay=15&lunarMonth=8&type=CO_DINH&region=TOAN_QUOC&repeatAnnually=true&page=0&size=5&sortBy=importancelevel&sortOrder=desc

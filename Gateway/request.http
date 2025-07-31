@@ -1,2 +1,0 @@
-### TEST
-GET http://localhost:8080/calendar/s2l?dd=4&mm=10&yyyy=2023
